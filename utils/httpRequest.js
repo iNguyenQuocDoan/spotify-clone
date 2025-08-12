@@ -16,16 +16,24 @@ class HttpRequest {
       if (data) {
         _option.body = JSON.stringify(data);
       }
+      // lấy accessToken từ localStorage
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        _option.headers.Authorization = `Bearer ${token}`;
+      }
       const res = await fetch(`${this.baseUrl}${path}`, _option);
       const response = await res.json();
+
       if (!res.ok) {
         const err = new Error(`HTTP error: ${res.status}`);
         err.response = response;
+        err.status = res.status;
         throw err;
       }
+
       return response;
     } catch (error) {
-      console.log(error, "err");
+      // console.log(error, "err");
       throw error;
     }
   }

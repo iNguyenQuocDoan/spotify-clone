@@ -93,14 +93,46 @@ document.addEventListener("DOMContentLoaded", function () {
           "auth/register",
           credentials
         );
+        localStorage.setItem("accessToken", access_token);
+
+        // dong modal
+        closeModal();
+        location.reload(); // reload
       } catch (error) {
-        console.log(error, "Error during signup");
+        if (error?.response?.error?.code === "EMAIL_EXISTS") {
+          console.log(error.response.error.message);
+        }
       }
 
       // console.log(user, access_token, "User Data");
-
-      localStorage.setItem("accessToken", access_token);
     });
+
+  loginForm
+    .querySelector(".auth-form-content")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = e.target.querySelector("#loginEmail").value;
+      const password = e.target.querySelector("#loginPassword").value;
+
+      const credentials = {
+        email,
+        password,
+      };
+
+      try {
+        const { user, access_token } = await httpRequest.post(
+          "auth/login",
+          credentials
+        );
+        localStorage.setItem("accessToken", access_token);
+
+        // dong modal
+        closeModal();
+        location.reload(); // reload
+      } catch (error) {}
+    });
+
+  logoutBtn;
 });
 
 // User Menu Dropdown Functionality
@@ -136,11 +168,39 @@ document.addEventListener("DOMContentLoaded", function () {
 
     console.log("Logout clicked");
     // TODO: Students will implement logout logic here
+    localStorage.removeItem("accessToken");
+    location.reload();
   });
 });
 
 // Other functionality
 document.addEventListener("DOMContentLoaded", async () => {
-  const { artists } = await httpRequest.get("artists");
-  console.log(artists, "Artists Data");
+  const authButtons = document.querySelectorAll(".auth-buttons");
+  const userMenu = document.querySelector(".user-menu");
+  const userAvatar = document.getElementById("userAvatar");
+  const userName = document.querySelector("#userName");
+
+  try {
+    const { user } = await httpRequest.get("users/me");
+    console.log(user, "User Data");
+    // logged
+    authButtons.forEach((btn) => (btn.style.display = "none"));
+    if (userMenu) userMenu.style.display = "flex";
+
+    if (userAvatar) {
+      userAvatar.src =
+        user.avatar_url ||
+        "https://via.placeholder.com/32x32?text=" +
+          (user.username?.charAt(0) || "U");
+      userAvatar.alt = user.username || "User Avatar";
+    }
+
+    if (userName) {
+      userName.textContent = user.username || "Anonymous";
+    }
+  } catch (error) {
+    // not logged
+    authButtons.forEach((btn) => (btn.style.display = "flex"));
+    if (userMenu) userMenu.style.display = "none";
+  }
 });
