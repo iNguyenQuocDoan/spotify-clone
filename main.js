@@ -1,3 +1,4 @@
+import { renderHome } from "./services/home.services.js";
 import httpRequest from "./utils/httpRequest.js";
 
 // Auth Modal Functionality
@@ -203,4 +204,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     authButtons.forEach((btn) => (btn.style.display = "flex"));
     if (userMenu) userMenu.style.display = "none";
   }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderHome();
 });
