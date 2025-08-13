@@ -1,10 +1,10 @@
 import httpRequest from "../utils/httpRequest.js";
 
-export const getAllTracks = async (limit = 12, offset = 0) => {
+export const getAllTracks = async (limit = 10, offset = 0) => {
   return httpRequest.get(`tracks?limit=${limit}&offset=${offset}`);
 };
 
-export const getPopularTracks = async (limit = 20) => {
+export const getPopularTracks = async (limit = 10) => {
   return httpRequest.get(`tracks/popular?limit=${limit}`);
 };
 

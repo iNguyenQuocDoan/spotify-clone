@@ -5,25 +5,35 @@ import { getPopularTracks } from "../api/tracks.api.js";
 function mapTrack(t) {
   // Ưu tiên thứ tự: real images từ server -> album/artist images -> local placeholder
   let imageUrl = null;
-  
+
   // Chỉ dùng real images từ spotify.f8team.dev server, bỏ qua via.placeholder.com
-  if (t.image_url && t.image_url.includes('spotify.f8team.dev')) {
+  if (t.image_url && t.image_url.includes("spotify.f8team.dev")) {
     imageUrl = t.image_url;
-  } else if (t.album_cover_image_url && t.album_cover_image_url.includes('spotify.f8team.dev')) {
+  } else if (
+    t.album_cover_image_url &&
+    t.album_cover_image_url.includes("spotify.f8team.dev")
+  ) {
     imageUrl = t.album_cover_image_url;
-  } else if (t.artist_image_url && t.artist_image_url.includes('spotify.f8team.dev')) {
+  } else if (
+    t.artist_image_url &&
+    t.artist_image_url.includes("spotify.f8team.dev")
+  ) {
     imageUrl = t.artist_image_url;
   }
-  
+
   // Fix URL formatting nếu bị lỗi
-  if (imageUrl && typeof imageUrl === 'string') {
+  if (imageUrl && typeof imageUrl === "string") {
     // Fix missing slash issues
-    imageUrl = imageUrl.replace('spotify.f8team.devimages', 'spotify.f8team.dev/uploads/images');
-    imageUrl = imageUrl.replace('spotify.f8team.devaudio', 'spotify.f8team.dev/uploads/audio');
+    imageUrl = imageUrl.replace(
+      "spotify.f8team.devimages",
+      "spotify.f8team.dev/uploads/images"
+    );
+    imageUrl = imageUrl.replace(
+      "spotify.f8team.devaudio",
+      "spotify.f8team.dev/uploads/audio"
+    );
   }
-  
-  console.log(`TRACK: ${t.title} → Final imageUrl: ${imageUrl || 'placeholder.svg'}`);
-  
+
   return {
     id: t.id,
     title: t.title || "Unknown Title",
@@ -112,8 +122,8 @@ export async function renderHome() {
 
   try {
     const [tracksResult, artistsResult] = await Promise.all([
-      getPopularTracks(12),
-      getAllArtists(12, 0),
+      getPopularTracks(10), // lấy 10 bài
+      getAllArtists(5, 0), // Giới hạn chỉ 5 nghệ sĩ
     ]);
 
     const trackViews = (tracksResult?.tracks || []).map(mapTrack);
