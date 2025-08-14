@@ -176,45 +176,56 @@ function setupTrackClickEvents(tracks) {
     const track = tracks[index];
     if (!track) return;
 
-    // thêm sự kiện click cho nút play
+    // Hàm phát nhạc chung
+    const playTrack = async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      try {
+        // import music player service
+        const { musicPlayer } = await import("./music.services.js");
+
+        // convert track format để match music player
+        const formattedTrack = {
+          id: track.id,
+          title: track.title,
+          artist_name: track.artist,
+          audio_url:
+            track.audioUrl ||
+            "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav", // demo url để test
+          image_url: track.imageUrl || "placeholder.svg",
+          duration: track.duration || 0,
+        };
+
+        // play track với full playlist
+        const formattedPlaylist = tracks.map((t) => ({
+          id: t.id,
+          title: t.title,
+          artist_name: t.artist,
+          audio_url:
+            t.audioUrl ||
+            "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav", // demo url để test
+          image_url: t.imageUrl || "placeholder.svg",
+          duration: t.duration || 0,
+        }));
+
+        await musicPlayer.playTrack(formattedTrack, formattedPlaylist);
+      } catch (error) {
+        console.error("lỗi khi play track:", error);
+      }
+    };
+
+    // thêm sự kiện click cho toàn bộ card
+    cardEl.style.cursor = "pointer";
+    cardEl.addEventListener("click", playTrack);
+
+    // thêm sự kiện click cho nút play (để tránh double event)
     const playBtn = cardEl.querySelector(".hit-play-btn");
     if (playBtn) {
-      playBtn.addEventListener("click", async (e) => {
-        e.preventDefault();
+      playBtn.addEventListener("click", (e) => {
+        // Ngăn event bubbling để không trigger card click
         e.stopPropagation();
-
-        try {
-          // import music player service
-          const { musicPlayer } = await import("./music.services.js");
-
-          // convert track format để match music player
-          const formattedTrack = {
-            id: track.id,
-            title: track.title,
-            artist_name: track.artist,
-            audio_url:
-              track.audioUrl ||
-              "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav", // demo url để test
-            image_url: track.imageUrl || "placeholder.svg",
-            duration: track.duration || 0,
-          };
-
-          // play track với full playlist
-          const formattedPlaylist = tracks.map((t) => ({
-            id: t.id,
-            title: t.title,
-            artist_name: t.artist,
-            audio_url:
-              t.audioUrl ||
-              "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav", // demo url để test
-            image_url: t.imageUrl || "placeholder.svg",
-            duration: t.duration || 0,
-          }));
-
-          await musicPlayer.playTrack(formattedTrack, formattedPlaylist);
-        } catch (error) {
-          console.error("lỗi khi play track:", error);
-        }
+        playTrack(e);
       });
     }
 
