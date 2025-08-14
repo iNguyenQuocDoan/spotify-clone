@@ -1,5 +1,7 @@
 import { renderHome } from "./services/home.services.js";
 import { renderSidebar } from "./services/sidebar.services.js";
+import { setupMusicPlayer } from "./services/music.services.js";
+
 import httpRequest from "./utils/httpRequest.js";
 
 // Auth Modal Functionality
@@ -210,4 +212,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 document.addEventListener("DOMContentLoaded", () => {
   renderHome();
   renderSidebar();
+  setupMusicPlayer();
 });

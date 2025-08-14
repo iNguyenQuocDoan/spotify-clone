@@ -128,27 +128,15 @@ export async function renderHome() {
 }
 
 function setupArtistClickEvents() {
-  console.log("đang setup artist click events");
   const artistCards = document.querySelectorAll(".artist-card");
   const artistNames = document.querySelectorAll(".artist-card-name");
-
-  console.log("tìm thấy artist cards:", artistCards.length);
-  console.log("tìm thấy artist names:", artistNames.length);
 
   // thêm sự kiện click cho toàn bộ artist card
   artistCards.forEach((cardEl, index) => {
     cardEl.style.cursor = "pointer";
     const nameEl = cardEl.querySelector(".artist-card-name");
-    console.log(
-      `đang setup click event cho artist card ${index}:`,
-      nameEl ? nameEl.textContent : "Unknown"
-    );
 
     cardEl.addEventListener("click", (e) => {
-      console.log(
-        "artist card được click!",
-        nameEl ? nameEl.textContent : "Unknown"
-      );
       e.preventDefault();
       e.stopPropagation();
 
@@ -157,7 +145,7 @@ function setupArtistClickEvents() {
 
       if (artistId) {
         // import và gọi renderartistdetail
-        console.log("đang load artist detail cho id:", artistId);
+
         import("./artist.services.js")
           .then(({ renderArtistDetail }) => {
             renderArtistDetail(artistId);
@@ -182,16 +170,11 @@ function setupArtistClickEvents() {
 }
 
 function setupTrackClickEvents(tracks) {
-  console.log("đang setup track click events");
   const trackCards = document.querySelectorAll(".hit-card[data-type='track']");
-
-  console.log("tìm thấy track cards:", trackCards.length);
 
   trackCards.forEach((cardEl, index) => {
     const track = tracks[index];
     if (!track) return;
-
-    console.log(`đang setup click event cho track ${index}:`, track.title);
 
     // thêm sự kiện click cho nút play
     const playBtn = cardEl.querySelector(".hit-play-btn");
@@ -199,8 +182,6 @@ function setupTrackClickEvents(tracks) {
       playBtn.addEventListener("click", async (e) => {
         e.preventDefault();
         e.stopPropagation();
-
-        console.log("track play button được click:", track.title);
 
         try {
           // import music player service
