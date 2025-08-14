@@ -190,9 +190,7 @@ function setupTrackClickEvents(tracks) {
           id: track.id,
           title: track.title,
           artist_name: track.artist,
-          audio_url:
-            track.audioUrl ||
-            "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav", // demo url để test
+          audio_url: track.audioUrl,
           image_url: track.imageUrl || "placeholder.svg",
           duration: track.duration || 0,
         };
@@ -202,9 +200,7 @@ function setupTrackClickEvents(tracks) {
           id: t.id,
           title: t.title,
           artist_name: t.artist,
-          audio_url:
-            t.audioUrl ||
-            "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav", // demo url để test
+          audio_url: t.audioUrl,
           image_url: t.imageUrl || "placeholder.svg",
           duration: t.duration || 0,
         }));
