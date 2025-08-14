@@ -3,42 +3,24 @@ import { getAllPlaylists } from "../api/playlists.api.js";
 import { getPopularTracks } from "../api/tracks.api.js";
 
 function mapTrack(t) {
-  // Ưu tiên thứ tự: real images từ server -> album/artist images -> local placeholder
+  // ưu tiên thứ tự: hình từ track -> album -> artist -> placeholder
   let imageUrl = null;
 
-  // Chỉ dùng real images từ spotify.f8team.dev server, bỏ qua via.placeholder.com
-  if (t.image_url && t.image_url.includes("spotify.f8team.dev")) {
+  // sử dụng hình ảnh có sẵn theo thứ tự ưu tiên
+  if (t.image_url) {
     imageUrl = t.image_url;
-  } else if (
-    t.album_cover_image_url &&
-    t.album_cover_image_url.includes("spotify.f8team.dev")
-  ) {
+  } else if (t.album_cover_image_url) {
     imageUrl = t.album_cover_image_url;
-  } else if (
-    t.artist_image_url &&
-    t.artist_image_url.includes("spotify.f8team.dev")
-  ) {
+  } else if (t.artist_image_url) {
     imageUrl = t.artist_image_url;
-  }
-
-  // Fix URL formatting nếu bị lỗi
-  if (imageUrl && typeof imageUrl === "string") {
-    // Fix missing slash issues
-    imageUrl = imageUrl.replace(
-      "spotify.f8team.devimages",
-      "spotify.f8team.dev/uploads/images"
-    );
-    imageUrl = imageUrl.replace(
-      "spotify.f8team.devaudio",
-      "spotify.f8team.dev/uploads/audio"
-    );
   }
 
   return {
     id: t.id,
-    title: t.title || "Unknown Title",
-    artist: t.artist_name || "Unknown Artist",
-    imageUrl: imageUrl, // null if no valid server image found
+    title: t.title || "không rõ tên bài",
+    artist: t.artist_name || "không rõ nghệ sĩ",
+    imageUrl: imageUrl, // sử dụng hình có sẵn hoặc null
+    audioUrl: t.audio_url || null, // url âm thanh
     duration: t.duration || null,
     playCount: t.play_count || 0,
     albumTitle: t.album_title || null,
@@ -133,9 +115,143 @@ export async function renderHome() {
       trackViews.map(trackCardHtml).join("") || "<p>No tracks</p>";
     artistsGridEl.innerHTML =
       artistViews.map(artistCardHtml).join("") || "<p>No artists</p>";
+
+    // Thêm sự kiện click cho các artist cards
+    setupArtistClickEvents();
+    // thêm sự kiện click cho các track cards
+    setupTrackClickEvents(trackViews);
   } catch (error) {
-    console.error("renderHome error:", error);
+    console.error("renderhome error:", error);
     hitsGridEl.textContent = "Failed to load tracks";
     artistsGridEl.textContent = "Failed to load artists";
   }
+}
+
+function setupArtistClickEvents() {
+  console.log("đang setup artist click events");
+  const artistCards = document.querySelectorAll(".artist-card");
+  const artistNames = document.querySelectorAll(".artist-card-name");
+
+  console.log("tìm thấy artist cards:", artistCards.length);
+  console.log("tìm thấy artist names:", artistNames.length);
+
+  // thêm sự kiện click cho toàn bộ artist card
+  artistCards.forEach((cardEl, index) => {
+    cardEl.style.cursor = "pointer";
+    const nameEl = cardEl.querySelector(".artist-card-name");
+    console.log(
+      `đang setup click event cho artist card ${index}:`,
+      nameEl ? nameEl.textContent : "Unknown"
+    );
+
+    cardEl.addEventListener("click", (e) => {
+      console.log(
+        "artist card được click!",
+        nameEl ? nameEl.textContent : "Unknown"
+      );
+      e.preventDefault();
+      e.stopPropagation();
+
+      const artistId = cardEl.getAttribute("data-id");
+      console.log("artist id:", artistId);
+
+      if (artistId) {
+        // import và gọi renderartistdetail
+        console.log("đang load artist detail cho id:", artistId);
+        import("./artist.services.js")
+          .then(({ renderArtistDetail }) => {
+            renderArtistDetail(artistId);
+          })
+          .catch((error) => {
+            console.error("lỗi khi load artist detail:", error);
+          });
+      }
+    });
+  });
+
+  // thêm hiệu ứng hover cho artist cards
+  artistCards.forEach((cardEl) => {
+    cardEl.addEventListener("mouseenter", () => {
+      cardEl.style.transform = "scale(1.05)";
+      cardEl.style.transition = "transform 0.2s ease";
+    });
+    cardEl.addEventListener("mouseleave", () => {
+      cardEl.style.transform = "scale(1)";
+    });
+  });
+}
+
+function setupTrackClickEvents(tracks) {
+  console.log("đang setup track click events");
+  const trackCards = document.querySelectorAll(".hit-card[data-type='track']");
+
+  console.log("tìm thấy track cards:", trackCards.length);
+
+  trackCards.forEach((cardEl, index) => {
+    const track = tracks[index];
+    if (!track) return;
+
+    console.log(`đang setup click event cho track ${index}:`, track.title);
+
+    // thêm sự kiện click cho nút play
+    const playBtn = cardEl.querySelector(".hit-play-btn");
+    if (playBtn) {
+      playBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log("track play button được click:", track.title);
+
+        try {
+          // import music player service
+          const { musicPlayer } = await import("./music.services.js");
+
+          // convert track format để match music player
+          const formattedTrack = {
+            id: track.id,
+            title: track.title,
+            artist_name: track.artist,
+            audio_url:
+              track.audioUrl ||
+              "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav", // demo url để test
+            image_url: track.imageUrl || "placeholder.svg",
+            duration: track.duration || 0,
+          };
+
+          // play track với full playlist
+          const formattedPlaylist = tracks.map((t) => ({
+            id: t.id,
+            title: t.title,
+            artist_name: t.artist,
+            audio_url:
+              t.audioUrl ||
+              "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav", // demo url để test
+            image_url: t.imageUrl || "placeholder.svg",
+            duration: t.duration || 0,
+          }));
+
+          await musicPlayer.playTrack(formattedTrack, formattedPlaylist);
+        } catch (error) {
+          console.error("lỗi khi play track:", error);
+        }
+      });
+    }
+
+    // thêm hover effect cho track cards
+    cardEl.addEventListener("mouseenter", () => {
+      const playBtn = cardEl.querySelector(".hit-play-btn");
+      if (playBtn) {
+        playBtn.style.opacity = "1";
+        playBtn.style.transform = "scale(1)";
+      }
+    });
+
+    cardEl.addEventListener("mouseleave", () => {
+      const playBtn = cardEl.querySelector(".hit-play-btn");
+      if (playBtn) {
+        playBtn.style.opacity = "0";
+        playBtn.style.transform = "scale(0.8)";
+      }
+    });
+  });
 }

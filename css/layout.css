@@ -122,11 +122,16 @@
   background-color: var(--bg-secondary);
   border-radius: var(--radius-md);
   padding: var(--spacing-md) var(--spacing-lg);
-  display: flex;
+  display: none; /* ẩn player ban đầu */
   align-items: center;
   justify-content: space-between;
   z-index: var(--z-player);
   border-top: 1px solid var(--border-color);
+}
+
+/* hiển thị player khi có bài hát đang phát */
+.player.active {
+  display: flex;
 }
 
 .player-left {
