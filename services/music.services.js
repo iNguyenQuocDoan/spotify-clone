@@ -248,8 +248,6 @@ const musicPlayer = new MusicPlayer();
 
 // thiết lập điều khiển trình phát
 export function setupMusicPlayer() {
-  console.log("đang thiết lập điều khiển trình phát nhạc");
-
   // nút play/pause
   const playBtn = document.querySelector(".player-center .play-btn");
   if (playBtn) {

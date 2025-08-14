@@ -11,8 +11,6 @@ export async function renderArtistDetail(artistId) {
     return;
   }
 
-  console.log("Main content found, fetching artist data...");
-
   try {
     // Lấy thông tin chi tiết ca sĩ
     const artistData = await getArtistById(artistId);
