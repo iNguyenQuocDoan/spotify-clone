@@ -1,4 +1,3 @@
-// dịch vụ phát nhạc
 class MusicPlayer {
   constructor() {
     this.audio = new Audio();
